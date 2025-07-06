@@ -1,0 +1,1 @@
+# xử lý hình ảnh -> trả về miêu tả
