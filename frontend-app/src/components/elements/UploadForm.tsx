@@ -1,16 +1,48 @@
 import React, { useState } from 'react';
-import { Upload, X, FileImage } from 'lucide-react';
+import { Upload, X, FileImage, Loader } from 'lucide-react';
+import { useImageCaption } from '../../hooks/useImageCaption';
+import '../../css/elements/UploadForm.css';
 
-export default function UploadForm() {
+interface UploadFormProps {
+  onCaptionResult: (result: string | null) => void;
+  onProcessingState: (isProcessing: boolean) => void;
+  onError: (error: string | null) => void;
+  onClear: () => void;
+}
+
+export default function UploadForm({
+  onCaptionResult, 
+  onProcessingState, 
+  onError, 
+  onClear 
+}: UploadFormProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  //hooks
+  const {isLoading, error, result, caption, clearError, clearResult} = useImageCaption();
+  
+  React.useEffect(() => {
+    onProcessingState(isLoading);
+  }, [isLoading, onProcessingState]);
+
+  React.useEffect(() => {
+    onError(error);
+  }, [error, onError]);
+
+  React.useEffect(() => {
+    onCaptionResult(result);
+  }, [result, onCaptionResult]);
 
   const handleFileSelect = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
       setSelectedImage(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      clearError(); // Clear any previous error
+      clearResult(); // Clear previous result
+      onClear();
     }
   };
 
@@ -46,17 +78,18 @@ export default function UploadForm() {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (selectedImage) {
+    if (!selectedImage) {
       // Xử lý submit ở đây
-      console.log('Uploading image:', selectedImage);
-      alert(`Đã upload thành công: ${selectedImage.name}`);
+      alert('Please select an image to caption.');
+      return;
     }
+    await caption(selectedImage);
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div className="max-w-md p-6 bg-white rounded-lg shadow-lg upload-form">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         Upload Image
       </h2>
@@ -132,14 +165,23 @@ export default function UploadForm() {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={!selectedImage}
+          disabled={!selectedImage || isLoading}
           className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-            selectedImage
+            selectedImage && !isLoading
               ? 'bg-blue-600 hover:bg-blue-700 text-white'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          {selectedImage ? 'Caption the image' : 'Choose an Image'}
+          {isLoading ? (
+            <>
+              <Loader className='animate-spin h-4 w-4 inline-block mr-2' />
+              Processing...
+            </>
+          ) : selectedImage ? (
+            'Generate Caption'
+          ) : (
+            'Choose an Image'
+          )}
         </button>
       </form>
     </div>

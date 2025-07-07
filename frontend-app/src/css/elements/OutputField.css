@@ -1,0 +1,10 @@
+.caption-field {
+    /* set width always at 400px */
+    width: 500px;
+    height: 45vh;
+}
+@media screen and (max-width: 768px) {
+    .caption-field {
+        width: 100%;
+    }
+}
