@@ -1,5 +1,5 @@
 from flask import request
-from app.services.image_service import ImageService
+from services.ImageService import ImageService
 from app.utils.response_utils import success_response, error_response
 
 class ImageController:
@@ -8,7 +8,10 @@ class ImageController:
     
     def upload_and_caption(self):
         try:
-            caption = self.image_service.generateCaption(request.files['file'])
-            return "Upload and caption successful", 200
+            if 'image' not in request.files:
+                return error_response(message="No image file provided", status_code=400)
+            
+            caption = self.image_service.generateCaption(request.files['image'])
+            return success_response(data={"caption": caption}, message="Caption generated successfully")
         except Exception as e:
             return error_response(message=str(e), status_code=500)
