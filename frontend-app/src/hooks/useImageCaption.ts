@@ -23,7 +23,7 @@ export const useImageCaption = (): UseImageCaptionReturn => {
 
         try {
             const response: CaptionResponse = await apiService.captionImage(file);
-            setResult(response.caption || null);
+            setResult(response.data.caption || null);
         } catch (err) {
             if(axios.isAxiosError(err)) {
                 if (err.response) {

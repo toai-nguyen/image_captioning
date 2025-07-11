@@ -33,7 +33,10 @@ apiClient.interceptors.response.use(
 
 export interface CaptionResponse {
     success: boolean;
-    caption?: string;
+    // caption?: string;
+    data: {
+        caption: string | null;
+    };
 }
 
 export interface ErrorResponse {
@@ -47,7 +50,7 @@ export const apiService = {
         formData.append('image', imageFile);
 
         const response: AxiosResponse<CaptionResponse> = await apiClient.post(
-            'api/caption',
+            'api/upload',
             formData,
             {
                 headers: {
